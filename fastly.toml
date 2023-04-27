@@ -6,6 +6,28 @@ description = "An empty application template for the Fastly Compute@Edge environ
 language = "javascript"
 manifest_version = 3
 name = "Empty starter for JavaScript"
+service_id = ""
+
+[local_server]
+
+  [local_server.backends]
+
+    [local_server.backends.api_docs]
+      override_host = "example.com"
+      url = "https://example.com/"
+
+    [local_server.backends.github]
+      url = "https://github.com/"
+
+    [local_server.backends.github_api]
+      url = "https://api.github.com/"
+
+  [local_server.config_stores]
+
+    [local_server.config_stores.config]
+      file = "secrets.json"
+      format = "json"
 
 [scripts]
-build = "npm run build"
+  build = "$(npm bin)/webpack && $(npm bin)/js-compute-runtime ./bin/index.js ./bin/main.wasm"
+
