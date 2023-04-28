@@ -1,16 +1,8 @@
 {
-  "name": "compute-starter-kit-javascript-empty",
+  "name": "compute-oauth-demo",
   "version": "0.4.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fastly/compute-starter-kit-javascript-empty.git"
-  },
   "author": "oss@fastly.com",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/fastly/compute-starter-kit-javascript-empty/issues"
-  },
-  "homepage": "https://developer.fastly.com/solutions/starters/compute-starter-kit-javascript-empty",
   "dependencies": {
     "@fastly/expressly": "^1.4.0",
     "@fastly/js-compute": "^1.5.1",
