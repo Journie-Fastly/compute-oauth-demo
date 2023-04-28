@@ -1,11 +1,11 @@
 {
-  "name": "compute-starter-kit-javascript-empty",
+  "name": "compute-oauth-demo",
   "version": "0.4.0",
   "lockfileVersion": 2,
   "requires": true,
   "packages": {
     "": {
-      "name": "compute-starter-kit-javascript-empty",
+      "name": "compute-oauth-demo",
       "version": "0.4.0",
       "license": "MIT",
       "dependencies": {

@@ -18,12 +18,14 @@ function getConfig() {
 
 // Routing
 router.use("/", async (req, res) => {
-  // If user isn't authorized, redirect them to the login page
-  if (!("auth" in req.cookies)) {
-    res.redirect("/github/login");
-  } else {
-    // If they are authorized, serve the backend
-    res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
+  if (!req.path.startsWith("/github/")) {
+    // If user isn't authorized, redirect them to the login page
+    if (!req.cookies.get("auth")) {
+      res.redirect("/github/login");
+    } else {
+      // If they are authorized, serve the backend
+      res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
+    }
   }
 });
 
@@ -32,7 +34,7 @@ router.get("/github/login", async (req, res) => {
 
   const params = queryString.stringify({
     client_id: config.clientId,
-    redirect_uri: "http://localhost:7676/authenticate/github",
+    redirect_uri: req.urlObj.origin + "/github/callback",
     scope: ["read:user", "user:email"].join(" "), // space seperated string
     allow_signup: true,
   });
@@ -47,16 +49,19 @@ router.get("/github/login", async (req, res) => {
 });
 
 // After the user has signed in, set a cookie and redirect them to the homepage
-router.get("/authenticate/github", async (req, res) => {
-  let accessToken = await fetchAccessTokenFromCode(req.query.get("code"));
+router.get("/github/callback", async (req, res) => {
+  let accessToken = await fetchAccessTokenFromCode(
+    req.query.get("code"),
+    req.urlObj.origin
+  );
   let userData = await fetchGitHubUserData(accessToken);
   if (userData.login) {
-    res.cookie("auth", accessToken);
+    res.cookie("auth", accessToken, { path: "/" });
     res.redirect("/");
   }
 });
 
-async function fetchAccessTokenFromCode(code) {
+async function fetchAccessTokenFromCode(code, origin) {
   let config = getConfig();
   const resp = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -69,7 +74,7 @@ async function fetchAccessTokenFromCode(code) {
     body: JSON.stringify({
       client_id: config.clientId,
       client_secret: config.clientSecret,
-      redirect_uri: "http://localhost:7676/authenticate/github",
+      redirect_uri: origin + "/github/callback",
       code,
     }),
   });
