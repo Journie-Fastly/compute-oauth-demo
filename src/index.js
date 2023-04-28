@@ -8,11 +8,11 @@ const router = new Router();
 const BACKEND = "api_docs";
 
 function fetchConfig() {
-  const dict = new ConfigStore("config");
+  const configStore = new ConfigStore("config");
 
   return {
-    clientId: dict.get("client_id"),
-    clientSecret: dict.get("client_secret"),
+    clientId: configStore.get("client_id"),
+    clientSecret: configStore.get("client_secret"),
   };
 }
 
