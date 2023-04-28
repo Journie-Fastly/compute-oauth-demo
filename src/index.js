@@ -24,7 +24,7 @@ router.use("/", async (req, res) => {
       res.redirect("/github/login");
     } else {
       // If they are authorized, serve the backend
-      res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
+      res.send(await fetch(req, { backend: BACKEND }));
     }
   }
 });
