@@ -7,7 +7,7 @@ import loginView from "./views/login.html";
 const router = new Router();
 const BACKEND = "api_docs";
 
-function fetchConfig() {
+function getConfig() {
   const configStore = new ConfigStore("config");
 
   return {
@@ -28,7 +28,7 @@ router.use("/", async (req, res) => {
 });
 
 router.get("/github/login", async (req, res) => {
-  let config = fetchConfig();
+  let config = getConfig();
 
   const params = queryString.stringify({
     client_id: config.clientId,
@@ -48,16 +48,16 @@ router.get("/github/login", async (req, res) => {
 
 // After the user has signed in, set a cookie and redirect them to the homepage
 router.get("/authenticate/github", async (req, res) => {
-  let accessToken = await getAccessTokenFromCode(req.query.get("code"));
-  let userData = await getGitHubUserData(accessToken);
+  let accessToken = await fetchAccessTokenFromCode(req.query.get("code"));
+  let userData = await fetchGitHubUserData(accessToken);
   if (userData.login) {
     res.cookie("auth", accessToken);
     res.redirect("/");
   }
 });
 
-async function getAccessTokenFromCode(code) {
-  let config = fetchConfig();
+async function fetchAccessTokenFromCode(code) {
+  let config = getConfig();
   const resp = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     backend: "github",
@@ -78,7 +78,7 @@ async function getAccessTokenFromCode(code) {
   return parsedData.access_token;
 }
 
-async function getGitHubUserData(access_token) {
+async function fetchGitHubUserData(access_token) {
   const resp = await fetch("https://api.github.com/user", {
     headers: {
       Authorization: `token ${access_token}`,
