@@ -27,7 +27,3 @@ service_id = ""
     [local_server.config_stores.config]
       file = "secrets.json"
       format = "json"
-
-[scripts]
-  build = "$(npm bin)/webpack && $(npm bin)/js-compute-runtime ./bin/index.js ./bin/main.wasm"
-
