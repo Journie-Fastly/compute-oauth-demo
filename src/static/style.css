@@ -12,6 +12,40 @@ body {
   --width: 900px;
 }
 
+#center {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button {
+  display: block;
+  padding: 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #7aa8b7;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.3s;
+  margin-top: 20px;
+}
+
+.button:hover {
+  background-color: #c2c7c7;
+}
+
+#login-text {
+  margin-bottom: 50px;
+}
+
+#logo {
+  height: 22px;
+  width: 22px;
+  margin-right: 5px;
+}
+
 h1 {
   font-size: 1.6rem;
   font-weight: 600;

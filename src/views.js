@@ -1,4 +1,6 @@
 // Injects styles and props into the given template.
+import styles from "./static/style.css";
+
 export default function processView(template, props) {
   for (let key in props) {
     template = template.replace(
@@ -6,5 +8,8 @@ export default function processView(template, props) {
       props[key]
     );
   }
-  return template;
+  return template.replace(
+    "</head>",
+    "<style>" + styles.replace(new RegExp("\n", "g"), "") + "</style></head>"
+  );
 }

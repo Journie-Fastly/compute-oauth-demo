@@ -8,22 +8,24 @@ const router = new Router();
 const BACKEND = "api_docs";
 
 function fetchConfig() {
-  const dict = new ConfigStore("config");
+  const configStore = new ConfigStore("config");
 
   return {
-    clientId: dict.get("client_id"),
-    clientSecret: dict.get("client_secret"),
+    clientId: configStore.get("client_id"),
+    clientSecret: configStore.get("client_secret"),
   };
 }
 
 // Routing
 router.use("/", async (req, res) => {
   // If user isn't authorized, redirect them to the login page
-  if (!("auth" in req.cookies)) {
-    res.redirect("/github/login");
-  } else {
-    // If they are authorized, serve the backend
-    res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
+  if (!req.path.startsWith("/github")) {
+    if (!("auth" in req.cookies)) {
+      res.redirect("/github/login");
+    } else {
+      // If they are authorized, serve the backend
+      res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
+    }
   }
 });
 
@@ -32,7 +34,7 @@ router.get("/github/login", async (req, res) => {
 
   const params = queryString.stringify({
     client_id: config.clientId,
-    redirect_uri: "http://localhost:7676/authenticate/github",
+    redirect_uri: "http://localhost:7676/github/callback",
     scope: ["read:user", "user:email"].join(" "), // space seperated string
     allow_signup: true,
   });
@@ -51,8 +53,7 @@ router.get("/authenticate/github", async (req, res) => {
   let accessToken = await getAccessTokenFromCode(req.query.get("code"));
   let userData = await getGitHubUserData(accessToken);
   if (userData.login) {
-    res.cookie("auth", accessToken);
-    res.redirect("/");
+    res.send(await fetch("http://localhost:7676/", { backend: BACKEND }));
   }
 });
 
@@ -69,7 +70,7 @@ async function getAccessTokenFromCode(code) {
     body: JSON.stringify({
       client_id: config.clientId,
       client_secret: config.clientSecret,
-      redirect_uri: "http://localhost:7676/authenticate/github",
+      redirect_uri: "http://localhost:7676/github/callback",
       code,
     }),
   });
