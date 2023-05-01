@@ -6,7 +6,7 @@ description = "An empty application template for the Fastly Compute@Edge environ
 language = "javascript"
 manifest_version = 3
 name = "Empty starter for JavaScript"
-service_id = ""
+service_id = "wjUhTfvpI6W11EP7kzY9k5"
 
 [local_server]
 

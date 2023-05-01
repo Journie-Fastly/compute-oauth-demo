@@ -3,6 +3,7 @@ import { Router } from "@fastly/expressly";
 import queryString from "query-string";
 import processView from "./views";
 import loginView from "./views/login.html";
+import errorView from "./views/error.html";
 
 const router = new Router();
 const BACKEND = "api_docs";
@@ -18,13 +19,18 @@ function getConfig() {
 
 // Routing
 router.use("/", async (req, res) => {
+  let accessToken = req.cookies.get("auth");
   if (!req.path.startsWith("/github/")) {
     // If user isn't authorized, redirect them to the login page
-    if (!req.cookies.get("auth")) {
+    if (!accessToken) {
       res.redirect("/github/login");
     } else {
       // If they are authorized, serve the backend
-      res.send(await fetch(req, { backend: BACKEND }));
+      if (await validateGithubOrgs(accessToken)) {
+        res.send(await fetch(req, { backend: BACKEND }));
+      } else {
+        res.html(errorView);
+      }
     }
   }
 });
@@ -35,7 +41,7 @@ router.get("/github/login", async (req, res) => {
   const params = queryString.stringify({
     client_id: config.clientId,
     redirect_uri: req.urlObj.origin + "/github/callback",
-    scope: ["read:user", "user:email"].join(" "), // space seperated string
+    scope: ["read:user", "user:email", "read:org", "user"].join(" "), // space seperated string
     allow_signup: true,
   });
 
@@ -54,10 +60,12 @@ router.get("/github/callback", async (req, res) => {
     req.query.get("code"),
     req.urlObj.origin
   );
-  let userData = await fetchGitHubUserData(accessToken);
-  if (userData.login) {
+  let userData = await validateGithubOrgs(accessToken);
+  if (userData) {
     res.cookie("auth", accessToken, { path: "/" });
     res.redirect("/");
+  } else {
+    res.html(errorView);
   }
 });
 
@@ -83,8 +91,16 @@ async function fetchAccessTokenFromCode(code, origin) {
   return parsedData.access_token;
 }
 
-async function fetchGitHubUserData(access_token) {
-  const resp = await fetch("https://api.github.com/user", {
+async function validateGithubOrgs(access_token) {
+  let orgs = await fetchGitHubOrgs(access_token);
+  console.log(orgs);
+  return orgs.some((org) => {
+    return org.login === "fastlylive";
+  });
+}
+
+async function fetchGitHubOrgs(access_token) {
+  const resp = await fetch("https://api.github.com/user/orgs", {
     headers: {
       Authorization: `token ${access_token}`,
       Accept: "application/json",
